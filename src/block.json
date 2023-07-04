@@ -20,6 +20,10 @@
 		"postType": {
             "type": "array",
             "default": ["post"]
+        },
+		"terms": {
+            "type": "array",
+            "default": []
         }
     },
 	"textdomain": "test",

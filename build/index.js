@@ -62,25 +62,139 @@ __webpack_require__.r(__webpack_exports__);
  * @return {WPElement} Element to render.
  */
 
-function MyCheckboxControl2(_ref) {
+function TaxesRow(_ref) {
+  let {
+    tax,
+    curTypes,
+    attr,
+    setAttr
+  } = _ref;
+  if (curTypes.filter(value => tax.types.includes(value)).length == 0) return;
+  console.log(attr);
+  let curTerms = attr.terms;
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "tax-row"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("label", {
+    className: "tax-name"
+  }, tax.name), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "tax-terms"
+  }, tax.terms.map((item, index) => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.CheckboxControl, {
+    label: item.name,
+    value: item.id,
+    key: index,
+    onChange: checked => {
+      curTerms = curTerms.filter(value => value !== item.id);
+      if (checked) {
+        curTerms.push(item.id);
+      }
+      setAttr({
+        terms: curTerms
+      });
+    },
+    checked: curTerms.includes(item.id) ? true : false
+  }))));
+}
+function TaxesRows(_ref2) {
+  let {
+    types,
+    curTypes,
+    attr,
+    setAttr
+  } = _ref2;
+  const {
+    tempTaxes,
+    hasResolved
+  } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.useSelect)(select => {
+    return {
+      tempTaxes: select(_wordpress_core_data__WEBPACK_IMPORTED_MODULE_5__.store).getTaxonomies(),
+      hasResolved: select(_wordpress_core_data__WEBPACK_IMPORTED_MODULE_5__.store).hasFinishedResolution('getTaxonomies')
+    };
+  });
+  const postTypesAr = [];
+  types.map((item, index) => {
+    postTypesAr[index] = item.value;
+  });
+  const termsResolved = [];
+  let i = 0;
+  const taxes = tempTaxes.filter(tax => {
+    let check = false;
+    tax.types.map(t => {
+      if (postTypesAr.indexOf(t) > -1) {
+        check = true;
+      }
+    });
+    return check;
+  }).map(tax => {
+    const {
+      terms,
+      resolved
+    } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.useSelect)(select => {
+      return {
+        terms: select('core').getEntityRecords('taxonomy', tax.slug, {
+          hide_empty: true,
+          per_page: -1,
+          orderby: 'name',
+          order: 'asc',
+          _fields: 'id,name,slug,count'
+        }),
+        resolved: select(_wordpress_core_data__WEBPACK_IMPORTED_MODULE_5__.store).hasFinishedResolution('getEntityRecords', ['taxonomy', tax.slug, {
+          hide_empty: true,
+          per_page: -1,
+          orderby: 'name',
+          order: 'asc',
+          _fields: 'id,name,slug,count'
+        }])
+      };
+    });
+    return {
+      name: tax.name,
+      types: tax.types,
+      slug: tax.slug,
+      terms: terms,
+      resolved: resolved
+    };
+  }).filter(tax => tax.terms && tax.terms.length > 0);
+  if (!hasResolved) {
+    return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.Spinner, null);
+  }
+  for (let i = 0; i < taxes; i++) {
+    if (!taxes[i].resolved) return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.Spinner, null);
+  }
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, taxes.map((tax, index) => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(TaxesRow, {
+    tax: tax,
+    curTypes: curTypes,
+    key: index,
+    attr: attr,
+    setAttr: setAttr
+  })));
+}
+function MyCheckboxControl2(_ref3) {
   let {
     attributes,
     setPostType
-  } = _ref;
-  const {
-    postType
-  } = attributes;
+  } = _ref3;
   let curPostTypes = attributes.postType;
-  const allPostTypes = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.useSelect)(select => select(_wordpress_core_data__WEBPACK_IMPORTED_MODULE_5__.store).getPostTypes({
-    per_page: -1
-  }), []);
+  const {
+    allPostTypes,
+    hasResolved
+  } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.useSelect)(select => {
+    return {
+      allPostTypes: select(_wordpress_core_data__WEBPACK_IMPORTED_MODULE_5__.store).getPostTypes({
+        per_page: -1
+      }),
+      hasResolved: select(_wordpress_core_data__WEBPACK_IMPORTED_MODULE_5__.store).hasFinishedResolution('getPostTypes', [{
+        per_page: -1
+      }])
+    };
+  });
   const postTypes = !Array.isArray(allPostTypes) ? [] : allPostTypes.filter(postType => postType.viewable == true && postType.slug != 'attachment').map(postType => ({
     label: postType.labels.singular_name,
     value: postType.slug
   }));
-  let taxes = [];
-  let postTypeTaxes = [];
-  return postTypes.map((item, index) => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.CheckboxControl, {
+  if (!hasResolved) {
+    return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.Spinner, null);
+  }
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, postTypes.map((item, index) => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.CheckboxControl, {
     label: item.label,
     onChange: checked => {
       curPostTypes = curPostTypes.filter(value => value !== item.value);
@@ -92,25 +206,21 @@ function MyCheckboxControl2(_ref) {
       });
     },
     value: item.value,
-    checked: curPostTypes.includes(item.value) ? true : false
+    checked: curPostTypes.includes(item.value) ? true : false,
+    key: index
+  })), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(TaxesRows, {
+    types: postTypes,
+    curTypes: curPostTypes,
+    attr: attributes,
+    setAttr: setPostType
   }));
 }
 ;
-function Edit(_ref2) {
+function Edit(_ref4) {
   let {
     attributes,
     setAttributes
-  } = _ref2;
-  const [isChecked, setChecked] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(true);
-  const MyCheckboxControl = () => {
-    const [isChecked, setChecked] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(true);
-    return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.CheckboxControl, {
-      label: "Is author",
-      help: "Is the user a author or not?",
-      checked: isChecked,
-      onChange: setChecked
-    });
-  };
+  } = _ref4;
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.useBlockProps)(), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.InspectorControls, {
     key: "setting"
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.TextControl, {
@@ -127,10 +237,10 @@ function Edit(_ref2) {
     onChange: val => setAttributes({
       message2: val
     })
-  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(MyCheckboxControl, null), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(MyCheckboxControl2, {
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(MyCheckboxControl2, {
     attributes: attributes,
     setPostType: setAttributes
-  })), (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Test – hello from the test editor!', 'test'), "Test mes:  ", attributes.message, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("br", null), " Mess2:  ", attributes.message2);
+  })), "Test mes:  ", attributes.message, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("br", null), " Mess2:  ", attributes.message2);
 }
 
 /***/ }),
@@ -331,7 +441,7 @@ module.exports = window["wp"]["i18n"];
   \************************/
 /***/ ((module) => {
 
-module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"create-block/test","version":"0.1.0","title":"Test","category":"widgets","icon":"smiley","description":"Example block scaffolded with Create Block tool.","supports":{"html":false},"attributes":{"message":{"type":"string"},"message2":{"type":"string"},"postType":{"type":"array","default":["post"]}},"textdomain":"test","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css"}');
+module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"create-block/test","version":"0.1.0","title":"Test","category":"widgets","icon":"smiley","description":"Example block scaffolded with Create Block tool.","supports":{"html":false},"attributes":{"message":{"type":"string"},"message2":{"type":"string"},"postType":{"type":"array","default":["post"]},"terms":{"type":"array","default":[]}},"textdomain":"test","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css"}');
 
 /***/ })
 
