@@ -168,7 +168,7 @@ function TaxesRows(_ref2) {
     setAttr: setAttr
   })));
 }
-function MyCheckboxControl2(_ref3) {
+function PostsAndTaxes(_ref3) {
   let {
     attributes,
     setPostType
@@ -221,7 +221,10 @@ function Edit(_ref4) {
     attributes,
     setAttributes
   } = _ref4;
-  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.useBlockProps)(), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.InspectorControls, {
+  const posts = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.useSelect)(select => {
+    return select('core').getEntityRecords('postType', 'post');
+  }, []);
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.useBlockProps)(), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.InspectorControls, {
     key: "setting"
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.TextControl, {
     className: "blocks-basecontrol_input",
@@ -237,10 +240,12 @@ function Edit(_ref4) {
     onChange: val => setAttributes({
       message2: val
     })
-  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(MyCheckboxControl2, {
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(PostsAndTaxes, {
     attributes: attributes,
     setPostType: setAttributes
-  })), "Test mes:  ", attributes.message, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("br", null), " Mess2:  ", attributes.message2);
+  })), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "viv-grid-block"
+  }), "Test mes:  ", attributes.message, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("br", null), " Mess2:  ", attributes.message2);
 }
 
 /***/ }),

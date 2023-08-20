@@ -129,7 +129,7 @@ function TaxesRows({types,curTypes,attr,setAttr}){
 	
 }
  
-function MyCheckboxControl2({attributes,setPostType}){
+function PostsAndTaxes({attributes,setPostType}){
 	
 	let curPostTypes= attributes.postType;
 	
@@ -178,9 +178,11 @@ function MyCheckboxControl2({attributes,setPostType}){
 };
 export default function Edit({attributes,setAttributes}) {
 
-
+	const posts = useSelect( ( select ) => {
+		return select( 'core' ).getEntityRecords( 'postType', 'post' );
+	},[]);
 	return (
-		<p { ...useBlockProps() }>
+		<div { ...useBlockProps() }>
 			<InspectorControls key="setting">
 				<TextControl className="blocks-basecontrol_input"
 					label ={"Mess"}
@@ -192,11 +194,14 @@ export default function Edit({attributes,setAttributes}) {
 					value={ attributes.message2 }
 					onChange={ ( val ) => setAttributes( { message2: val } ) }
 				/>
-				<MyCheckboxControl2 attributes={attributes} setPostType={setAttributes} />
+				<PostsAndTaxes attributes={attributes} setPostType={setAttributes} />
 			</InspectorControls>
+			<div className="viv-grid-block">
+			
+			</div>
 			Test mes:  { attributes.message }
 			<br /> Mess2:  { attributes.message2 }
-		</p>
+		</div>
 	);
 }
 
